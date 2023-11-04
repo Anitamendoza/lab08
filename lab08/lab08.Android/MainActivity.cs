@@ -1,132 +1,28 @@
-﻿using Android.App;
-using Android.OS;
-using lab08.Droid;
-using Android.Content;
-using System;
+﻿using System;
 
-[assembly: Xamarin.Forms.Dependency(typeof(BatteryImplementation))]
+using Android.App;
+using Android.Content.PM;
+using Android.Runtime;
+using Android.OS;
+
 namespace lab08.Droid
 {
-    public class BatteryImplementation : IBattery
+    [Activity(Label = "lab08", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize)]
+    public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
-        public BatteryImplementation()
+        protected override void OnCreate(Bundle savedInstanceState)
         {
+            base.OnCreate(savedInstanceState);
+
+            Xamarin.Essentials.Platform.Init(this, savedInstanceState);
+            global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
+            LoadApplication(new App());
         }
-
-        public int RemainingChargePercent
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
-            get
-            {
-                try
-                {
-                    using (var filter = new IntentFilter(Intent.ActionBatteryChanged))
-                    {
-                        using (var battery = Application.Context.RegisterReceiver(null, filter))
-                        {
-                            var level = battery.GetIntExtra(BatteryManager.ExtraLevel, -1);
-                            var scale = battery.GetIntExtra(BatteryManager.ExtraScale, -1);
+            Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 
-                            return (int)Math.Floor(level * 100D / scale);
-                        }
-                    }
-                }
-                catch
-                {
-                    System.Diagnostics.Debug.WriteLine("Ensure you have android.permission.BATTERY_STATS");
-                    throw;
-                }
-            }
-        }
-
-        public lab08.BatteryStatus Status
-        {
-            get
-            {
-                try
-                {
-                    using (var filter = new IntentFilter(Intent.ActionBatteryChanged))
-                    {
-                        using (var battery = Application.Context.RegisterReceiver(null, filter))
-                        {
-                            int status = battery.GetIntExtra(BatteryManager.ExtraStatus, -1);
-                            var isCharging = status == (int)BatteryStatus.Charging || status == (int)BatteryStatus.Full;
-
-                            var chargePlug = battery.GetIntExtra(BatteryManager.ExtraPlugged, -1);
-                            var usbCharge = chargePlug == (int)BatteryPlugged.Usb;
-                            var acCharge = chargePlug == (int)BatteryPlugged.Ac;
-                            bool wirelessCharge = false;
-                            wirelessCharge = chargePlug == (int)BatteryPlugged.Wireless;
-
-                            isCharging = (usbCharge || acCharge || wirelessCharge);
-                            if (isCharging)
-                                return lab08.BatteryStatus.Charging;
-
-                            switch (status)
-                            {
-                                case (int)BatteryStatus.Charging:
-                                    return lab08.BatteryStatus.Charging;
-                                case (int)BatteryStatus.Discharging:
-                                    return lab08.BatteryStatus.Discharging;
-                                case (int)BatteryStatus.Full:
-                                    return lab08.BatteryStatus.Full;
-                                case (int)BatteryStatus.NotCharging:
-                                    return lab08.BatteryStatus.NotCharging;
-                                default:
-                                    return lab08.BatteryStatus.Unknown;
-                            }
-                        }
-                    }
-                }
-                catch
-                {
-                    System.Diagnostics.Debug.WriteLine("Ensure you have android.permission.BATTERY_STATS");
-                    throw;
-                }
-            }
-        }
-
-        public PowerSource PowerSource
-        {
-            get
-            {
-                try
-                {
-                    using (var filter = new IntentFilter(Intent.ActionBatteryChanged))
-                    {
-                        using (var battery = Application.Context.RegisterReceiver(null, filter))
-                        {
-                            int status = battery.GetIntExtra(BatteryManager.ExtraStatus, -1);
-                            var isCharging = status == (int)BatteryStatus.Charging || status == (int)BatteryStatus.Full;
-
-                            var chargePlug = battery.GetIntExtra(BatteryManager.ExtraPlugged, -1);
-                            var usbCharge = chargePlug == (int)BatteryPlugged.Usb;
-                            var acCharge = chargePlug == (int)BatteryPlugged.Ac;
-
-                            bool wirelessCharge = false;
-                            wirelessCharge = chargePlug == (int)BatteryPlugged.Wireless;
-
-                            isCharging = (usbCharge || acCharge || wirelessCharge);
-
-                            if (!isCharging)
-                                return lab08.PowerSource.Battery;
-                            else if (usbCharge)
-                                return lab08.PowerSource.Usb;
-                            else if (acCharge)
-                                return lab08.PowerSource.Ac;
-                            else if (wirelessCharge)
-                                return lab08.PowerSource.Wireless;
-                            else
-                                return lab08.PowerSource.Other;
-                        }
-                    }
-                }
-                catch
-                {
-                    System.Diagnostics.Debug.WriteLine("Ensure you have android.permission.BATTERY_STATS");
-                    throw;
-                }
-            }
+            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 }
-
