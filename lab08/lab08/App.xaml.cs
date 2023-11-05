@@ -15,7 +15,8 @@ namespace lab08
 
             DependencyService.Register<MockDataStore>();
             // MainPage = new AppShell();
-            MainPage = new BatteryDemo();
+            // MainPage = new BatteryDemo();
+            MainPage = new QRDemo();
         }
 
         protected override void OnStart()
